@@ -64,9 +64,9 @@ message handlers for its methods, then run the flux reactor. It should
 use event driven (reactive) programming techniques to remain responsive
 while juggling work from multiple clients.
 
-Keepalive messages are sent to the broker via pre-registered reactor
+PUP messages are sent to the broker via pre-registered reactor
 watchers to indicate when the module is initializing, running, finalizing,
-or exited. At initialization, a module MAY also manually send a keepalive
+or exited. At initialization, a module MAY also manually send a PUP
 message to indicate to the broker when initialization is complete. This
 provides synchronization to the broker module loader as well as useful
 runtime debug information that can be reported by ``flux module list``.
@@ -91,35 +91,29 @@ A broker module SHALL export the following global symbols:
    type of error on failure.
 
 
-Keepalive Values
-~~~~~~~~~~~~~~~~
+PUP Messages
+~~~~~~~~~~~~
 
-A broker module SHALL send RFC 3 keepalive messages containing status
-integers to the broker over its broker handle. Status integers are
-enumerated as follows:
+A broker module SHALL send RFC 3 PUP messages containing module status
+updates to the broker over its broker handle.
+
+The PUP ``arg2`` value SHALL be one of the following state numbers:
 
 -  FLUX_MODSTATE_INIT (0) - initializing
-
 -  FLUX_MODSTATE_RUNNING (1) - running
-
 -  FLUX_MODSTATE_FINALIZING (2) - finalizing
-
 -  FLUX_MODSTATE_EXITED (3) - ``mod_main()`` exited
 
-Modules SHALL send a keepalive message of ``FLUX_MODSTATE_RUNNING``
+The PUP ``arg1`` value SHALL be zero, except when ``arg2`` is
+``FLUX_MODSTATE_EXITED``.  In that case, ``arg1`` SHALL indicate the exit code
+of ``mod_main()``:  zero on success, or a POSIX ``errno`` value on failure.
+
+Modules SHALL send a PUP message indicating ``FLUX_MODSTATE_RUNNING``
 after initialization to notify the broker that the module has started
-successfully. In order to ensure this happens for all modules, A keepalive
+successfully.  In order to ensure this happens for all modules, A PUP
 message SHALL be sent via a pre-registered reactor watcher upon a module's
 first entry to the reactor if the module has not otherwise entered the
-RUNNING state. In addition, keepalive messages MAY be sent to the broker
-at regular intervals. The keepalive ``errnum`` field SHALL be zero except
-when ``mod_main()`` returns a value of -1 indicating failure and state
-transitions to FLUX_MODSTATE_EXITED. In this case ``errnum`` SHALL be
-set to the value of POSIX ``errno`` set by ``mod_main()`` before returning.
-
-The broker MAY track the number of session heartbeats since a
-module last sent a message and report this as "idle time"
-for the module.
+RUNNING state.
 
 
 Load Sequence
@@ -138,7 +132,7 @@ Unload Sequence
 The broker module loader SHALL send a ``<service>.shutdown`` request to the
 module when the module loader receives a ``broker.rmmod`` request for the
 module. In response, the broker module SHALL exit ``mod_main()``, send a
-keepalive transition to FLUX_MODSTATE_EXITED state, and exit the
+PUP message indicating a transition to FLUX_MODSTATE_EXITED state, and exit the
 module’s thread or process. This final state transition indicates to
 the broker that it MAY clean up the module thread.
 
