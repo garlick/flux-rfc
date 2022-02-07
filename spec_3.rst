@@ -60,7 +60,7 @@ framework. A Flux *instance* is a set of interconnected ``flux-broker`` tasks
 that together provide a shared communications substrate for distributed
 resource manager services. Services and utilities communicate by passing
 messages through the session brokers. There are four types of messages:
-events, requests, responses, and keepalives, which share a common structure
+events, requests, responses, and PUPs, which share a common structure
 described herein.
 
 Event messages are published such that they are available to subscribers
@@ -77,8 +77,8 @@ Responses are optional replies to requests. They follow the ZeroMQ
 ROUTER-DEALER message flow, which unwinds the source address route
 accumulated by the request, and uses them to select among peers at each hop.
 
-Keepalives are control messages used by one peer to indicate to another
-peer that it is still alive when it is not otherwise communicating.
+PUPs (peer update protocol) are small control messages passed between
+directly connected Flux network peers.
 
 
 Implementation
@@ -242,13 +242,13 @@ ABNF grammar [#f2]_
 
    message       = C:request *S:response
                    / S:event
-                   / C:keepalive
+                   / C:pup
 
    ; Multi-part ZeroMQ messages
    C:request       = [routing] topic [payload] PROTO
    S:response      = [routing] topic [payload] PROTO
    S:event         = [routing] topic [payload] PROTO
-   C:keepalive     = PROTO
+   C:pup           = PROTO
 
    ; Route frame stack, ZeroMQ DEALER-ROUTER format
    routing         = *identity delimiter
@@ -262,12 +262,12 @@ ABNF grammar [#f2]_
    payload         = *OCTET        ; payload ZeroMQ frame
 
    ; Protocol frame
-   PROTO           = request / response / event / keepalive
+   PROTO           = request / response / event / pup
 
    request         = magic version %x01 flags userid rolemask nodeid   matchtag
    response        = magic version %x02 flags userid rolemask errnum   matchtag
    event           = magic version %x04 flags userid rolemask sequence unused
-   keepalive       = magic version %x08 flags userid rolemask errnum   status
+   pup             = magic version %x08 flags userid rolemask arg1     arg2
 
    ; Constants
    magic           = %x8E          ; magic cookie
@@ -292,6 +292,10 @@ ABNF grammar [#f2]_
    ; Role bitmask assigned by connector at message ingress
    rolemask        = 4OCTET
 
+   ; Context-dependent integer pup argument
+   arg1            = 4OCTET
+   arg2            = 4OCTET
+
    ; Matchtag to correlate request/response
    matchtag        = 4OCTET / matchtag-none
    matchtag-none   = %x00.00.00.00
@@ -311,4 +315,4 @@ ABNF grammar [#f2]_
 
 .. [#f1] `RFC 7159: The JavaScript Object Notation (JSON) Data Interchange Format <https://www.rfc-editor.org/rfc/rfc7159.txt>`__, T. Bray, Google, Inc, March 2014.
 
-.. [#f2] For convenience: the ``C:request``, ``S:response``, ``S:event``, and ``C:keepalive`` ABNF non-terminals refer to ZeroMQ messages, sent by client or server, and built from ordered ZeroMQ message parts (frames). Other non-terminals are built from concatenated ABNF terminals per usual. Thus it is meaningful for ``delimiter``, a message frame, to have zero length, since a zero-length message frame is valid ZMTP.
+.. [#f2] For convenience: the ``C:request``, ``S:response``, ``S:event``, and ``C:pup`` ABNF non-terminals refer to ZeroMQ messages, sent by client or server, and built from ordered ZeroMQ message parts (frames). Other non-terminals are built from concatenated ABNF terminals per usual. Thus it is meaningful for ``delimiter``, a message frame, to have zero length, since a zero-length message frame is valid ZMTP.
