@@ -729,7 +729,7 @@ Protocol Definition
 
    PMI1            = C:init      S:init
                    / C:maxes     S:maxes
-                   / C:abort     S:abort
+                   / C:abort
                    / C:finalize  S:finalize
                    / C:universe  S:universe
                    / C:appnum    S:appnum
@@ -756,8 +756,10 @@ Protocol Definition
                      [SP "kvsname_max=" uint SP "keylen_max=" uint SP "vallen_max=" uint]
                      LF
 
-   C:abort         = "cmd=abort" LF
-   S:abort         = LF
+   C:abort         = "cmd=abort" SP "exitcode=" int
+                     [SP "message=" string]
+                     LF
+                     ; abort has no server response
 
    C:finalize      = "cmd=finalize" LF
    S:finalize      = "cmd=finalize_ack"
