@@ -557,6 +557,7 @@ Notes:
 -  The barrier operation MUST be usable as a generic synchronization mechanism,
    without requiring KVS data to be queued for exchange.
 
+
 .. function:: int PMI_KVS_Create (char kvsname[], int length)
 .. function:: int PMI_KVS_Destroy (const char kvsname[]);
 .. function:: int PMI_KVS_Iter_first (const char kvsname[], char key[], int key_len, char val[], int val_len)
@@ -650,7 +651,8 @@ Wire Protocol
 *************
 
 The reference implementation of the PMI-1.1 wire protocol is the MPICH
-Hydra [#f4]_ process manager.
+Hydra [#f4]_ process manager.  The individual message formats are defined
+by the MPICH PMI-1.1 [#f7]_ and PMI-1.2 [#f8]_ protocol definition files.
 
 The protocol is comprised of request and response messages.
 All messages SHALL be terminated with a newline.
@@ -910,3 +912,7 @@ References
 .. [#f5] `SLURM PMI-1 implementation <https://github.com/SchedMD/slurm/blob/ba603812b947f14c1aba7adb220258feb7960001/src/api/slurm_pmi.c>`__
 
 .. [#f6] `PMI: A Scalable Parallel Process-Management Interface for Extreme-Scale Systems <https://www.mcs.anl.gov/papers/P1760.pdf>`__, P. Balaji et al, EuroMPI Proceedings, 2010.
+
+.. [#f7] `MPICH PMI-1.1 wire protocol definition <https://github.com/pmodels/mpich/blob/main/src/pmi/maint/pmi-1.1.txt>`__
+
+.. [#f8] `MPICH PMI-1.2 wire protocol definition <https://github.com/pmodels/mpich/blob/main/src/pmi/maint/pmi-1.2.txt>`__
