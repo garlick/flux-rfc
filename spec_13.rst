@@ -708,6 +708,10 @@ Some responses MAY include a "msg" key.
 On error, the "msg" key MAY be set to an error message.
 On success, the "msg" key MAY be set to "success", or it may be omitted.
 
+The get_result response MAY include a "found" key.
+On error, the "found" key, if set, MAY be be set to either "TRUE" or "FALSE".
+On success, the "found" key, if set, SHALL be set to "TRUE".
+
 If a protocol error occurs, the detecting side SHALL immediately close
 the connection and abort the program. IT SHOULD log the message so that
 the problem can be tracked down.
@@ -801,6 +805,7 @@ Protocol Definition
    C:get           = "cmd=get" SP "kvsname=" word SP "key=" word LF
    S:get           = "cmd=get_result"
                      [SP "rc=" int]
+                     [SP "found=" boolean]         ; OPTIONAL, default TRUE
                      [SP "value=" string]
                      LF
 
@@ -848,6 +853,7 @@ Protocol Definition
    string          = 1*(SP HTAB VCHAR)             ; visible char plus tab, space
    int             = *1("+" "-") uint              ; signed integer
    uint            = 1*DIGIT                       ; unsigned integer
+   boolean         = "TRUE" / "FALSE"              ; case-sensitive
 
 Back Compatibility
 ==================
