@@ -786,7 +786,7 @@ Protocol Definition
 
    ; Key Value Store
 
-   C:put           = "cmd=put" SP "kvsname=" word SP "key=" word SP "value=" string LF
+   C:put           = "cmd=put" [SP "kvsname=" word] SP "key=" word SP "value=" string LF
    S:put           = "cmd=put_result"
                      [SP "rc=" int]
                      LF
@@ -802,7 +802,7 @@ Protocol Definition
                      [SP "rc=" int]
                      LF
 
-   C:get           = "cmd=get" SP "kvsname=" word SP "key=" word LF
+   C:get           = "cmd=get" [SP "kvsname=" word] SP "key=" word LF
    S:get           = "cmd=get_result"
                      [SP "rc=" int]
                      [SP "found=" boolean]         ; OPTIONAL, default TRUE
