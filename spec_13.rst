@@ -59,12 +59,10 @@ PMI Versions
 This document covers PMI 1.1 with a few notes about backwards
 compatibility with earlier versions.
 
-The PMI version 2 API is disjoint from version 1. The version 2
-wire protocol builds on the same fundamental structures as version 1,
-but includes incompatible operations. Clients and servers negotiate
-the highest mutually supported protocol version, including across major
-protocol versions. Apart from version negotiation and the common
-fundamentals, PMI version 2 a different protocol and not covered here.
+The PMI version 2 wire protocol shares a version handshake with version 1,
+which enables a process manager to support either version on the same socket.
+Apart from that, version 2 has a different wire protocol and API and is not
+covered here.
 
 PMIx ("x" for exascale, from the OpenMPI community) is a separate effort
 that is not covered here.
@@ -679,13 +677,23 @@ a file descriptor, arrange for the file descriptor to be inherited by
 the process, and pass its number in the PMI_FD environment variable
 at process launch time.
 
-Version Negotiation
-===================
+Version Handshake
+=================
 
-The client SHALL send the init request first, with the highest version
-of PMI supported by the client. The server SHALL respond with the
-version of PMI that will be used for this connection. The client SHALL NOT
-send other commands until the init operation has completed.
+The client SHALL send the init request first, with the exact "pmi_version"
+and the *minimum* "pmi_subversion" it requires to operate.
+
+The server SHALL respond with the client's "pmi_version" and the *maximum*
+"pmi_subversion" it supports.  Alternatively, if the client's "pmi_version"
+is unsupported, or if the client's "pmi_subversion" exceeds its maximum, it
+SHALL respond with an error.
+
+The client SHALL NOT send other commands until the version handshake has
+completed.
+
+After the handshake completes, the client MAY use all commands supported
+by the server's maximum "pmi_subversion".  The server SHALL NOT restrict
+access to commands based on the client's minimum "pmi_subversion".
 
 Error Handling
 ==============
