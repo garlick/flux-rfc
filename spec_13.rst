@@ -928,9 +928,18 @@ Protocol Definition
 Back Compatibility
 ==================
 
-Earlier versions of the PMI-1 wire protocol did not include the init
-operation in which versions are exchanged. Protocol operations that
-were culled in PMI 1.1 are not covered here.
+PMI subversion 1 is not backwards compatible with version 0.  Practically
+speaking, subversion 0 no longer exists in the wild and therefore is
+not covered by this document.  The effective minimum PMI-1 subversion is 1.
+
+As implied in the Version Handshake section, a client sending a minimum
+version of 1.1 may be answered with a server maximum of 1.2 (or beyond).
+Clients need not speak subversions greater than their stated minimum,
+but servers MUST speak subversions less than or equal to their stated
+maximum.
+
+In practice, clients SHOULD always send subversion 1 and adaptively use
+features offered by the server if available.
 
 Local Process Group Information
 *******************************
