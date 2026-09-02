@@ -757,6 +757,29 @@ If a protocol error occurs, the detecting side SHALL immediately close
 the connection and abort the program. IT SHOULD log the message so that
 the problem can be tracked down.
 
+Barrier Operation
+=================
+
+The group barrier introduced in PMI 1.2 has the following wire protocol
+characteristics:
+
+- The barrier_in "group" key SHALL be a group designator string with a
+  decimal integer :tag suffix.
+
+- The group designator, which identifies the barrier scope, SHALL be one
+  of "WORLD" (all ranks), "NODE" (this rank), or a comma-delimited list of
+  ranks.  "SELF" SHALL NOT occur on the wire because PMI_GROUP_SELF is fully
+  handled within the client implementation.
+
+- The tag suffix SHOULD uniquely identify the barrier instance within the
+  client.  For example, it MAY be implemented as a thread safe, client
+  resident barrier counter.
+
+- The server SHALL return the client's integer tag value from barrier_in
+  in the corresponding barrier_out.  This allows multiple threads to perform
+  concurrent barriers, which implies that a PMI 1.2 client implementation
+  MUST manage concurrent thread access to PMI_FD.
+
 Spawn Operation
 ===============
 
