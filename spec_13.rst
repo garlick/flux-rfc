@@ -838,9 +838,13 @@ Protocol Definition
                      [SP "kvsname=" word]
                      LF
 
-   C:barrier       = "cmd=barrier_in" LF
+   C:barrier       = "cmd=barrier_in"
+                     [SP "group=" group]           ; subversion >= 2 only
+                     LF
+
    S:barrier       = "cmd=barrier_out"
                      [SP "rc=" int]
+                     [SP "tag=" int]               ; subversion >= 2 only
                      LF
 
    C:get           = "cmd=get" [SP "kvsname=" word] SP "key=" word LF
@@ -889,6 +893,8 @@ Protocol Definition
 
    ; macros
 
+   group           = ( "WORLD" / "NODE" / ranklist ) ":" int
+   ranklist        = uint *("," uint)              ; comma-delimited process ranks
    intlist         = int *["," int]                ; comma-delimited integers
    word            = 1*(%x21-3C %x3E-7E)           ; visible char minus =
    string          = 1*(SP HTAB VCHAR)             ; visible char plus tab, space
