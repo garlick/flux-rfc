@@ -557,6 +557,47 @@ Notes:
 -  The barrier operation MUST be usable as a generic synchronization mechanism,
    without requiring KVS data to be queued for exchange.
 
+.. function:: int PMI_Barrier_group (const int *group, int count, const char *stringtag)
+
+This function is a collective call across a subset of the process group,
+introduced in PMI subversion 1.2. :var:`group` is an array of :var:`count`
+process ranks identifying the subset, or one of the special constants below,
+in which case :var:`count` is ignored:
+
+.. list-table::
+   :header-rows: 1
+
+   * - Constant
+     - Value
+     - Meaning
+   * - PMI_GROUP_WORLD
+     - (int \*)0
+     - all processes in the process group
+   * - PMI_GROUP_SELF
+     - (int \*)1
+     - the calling process only
+   * - PMI_GROUP_NODE
+     - (int \*)2
+     - the processes co-located on the same node as the caller
+
+The PMI library SHALL block until all processes in the group have entered the
+call, or an error occurs. Upon successful return, KVS values put by group
+members before the call are available to :c:func:`PMI_KVS_Get` within the
+group. :var:`stringtag`, which MAY be NULL, distinguishes group barriers that
+are outstanding concurrently, for example when issued from multiple threads.
+
+Errors:
+
+-  PMI_FAIL - barrier failed, or the process manager does not support the
+   subversion 1.2 group barrier
+
+Notes:
+
+-  PMI_GROUP_SELF is a local operation that requires no communication with the
+   process manager. Because a subversion 1.1 process manager fails the call, a
+   client MAY call PMI_Barrier_group with PMI_GROUP_SELF to probe whether the
+   group barrier is supported.
+
 
 .. function:: int PMI_KVS_Create (char kvsname[], int length)
 .. function:: int PMI_KVS_Destroy (const char kvsname[]);
