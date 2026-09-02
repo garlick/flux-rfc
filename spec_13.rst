@@ -557,6 +557,7 @@ Notes:
 -  The barrier operation MUST be usable as a generic synchronization mechanism,
    without requiring KVS data to be queued for exchange.
 
+
 .. function:: int PMI_KVS_Create (char kvsname[], int length)
 .. function:: int PMI_KVS_Destroy (const char kvsname[]);
 .. function:: int PMI_KVS_Iter_first (const char kvsname[], char key[], int key_len, char val[], int val_len)
@@ -650,7 +651,8 @@ Wire Protocol
 *************
 
 The reference implementation of the PMI-1.1 wire protocol is the MPICH
-Hydra [#f4]_ process manager.
+Hydra [#f4]_ process manager.  The individual message formats are defined
+by the MPICH PMI-1.1 [#f7]_ and PMI-1.2 [#f8]_ protocol definition files.
 
 The protocol is comprised of request and response messages.
 All messages SHALL be terminated with a newline.
@@ -706,6 +708,10 @@ Some responses MAY include a "msg" key.
 On error, the "msg" key MAY be set to an error message.
 On success, the "msg" key MAY be set to "success", or it may be omitted.
 
+The get_result response MAY include a "found" key.
+On error, the "found" key, if set, MAY be be set to either "TRUE" or "FALSE".
+On success, the "found" key, if set, SHALL be set to "TRUE".
+
 If a protocol error occurs, the detecting side SHALL immediately close
 the connection and abort the program. IT SHOULD log the message so that
 the problem can be tracked down.
@@ -727,7 +733,7 @@ Protocol Definition
 
    PMI1            = C:init      S:init
                    / C:maxes     S:maxes
-                   / C:abort     S:abort
+                   / C:abort
                    / C:finalize  S:finalize
                    / C:universe  S:universe
                    / C:appnum    S:appnum
@@ -754,8 +760,10 @@ Protocol Definition
                      [SP "kvsname_max=" uint SP "keylen_max=" uint SP "vallen_max=" uint]
                      LF
 
-   C:abort         = "cmd=abort" LF
-   S:abort         = LF
+   C:abort         = "cmd=abort" SP "exitcode=" int
+                     [SP "message=" string]
+                     LF
+                     ; abort has no server response
 
    C:finalize      = "cmd=finalize" LF
    S:finalize      = "cmd=finalize_ack"
@@ -778,7 +786,7 @@ Protocol Definition
 
    ; Key Value Store
 
-   C:put           = "cmd=put" SP "kvsname=" word SP "key=" word SP "value=" string LF
+   C:put           = "cmd=put" [SP "kvsname=" word] SP "key=" word SP "value=" string LF
    S:put           = "cmd=put_result"
                      [SP "rc=" int]
                      LF
@@ -794,9 +802,10 @@ Protocol Definition
                      [SP "rc=" int]
                      LF
 
-   C:get           = "cmd=get" SP "kvsname=" word SP "key=" word LF
+   C:get           = "cmd=get" [SP "kvsname=" word] SP "key=" word LF
    S:get           = "cmd=get_result"
                      [SP "rc=" int]
+                     [SP "found=" boolean]         ; OPTIONAL, default TRUE
                      [SP "value=" string]
                      LF
 
@@ -844,6 +853,7 @@ Protocol Definition
    string          = 1*(SP HTAB VCHAR)             ; visible char plus tab, space
    int             = *1("+" "-") uint              ; signed integer
    uint            = 1*DIGIT                       ; unsigned integer
+   boolean         = "TRUE" / "FALSE"              ; case-sensitive
 
 Back Compatibility
 ==================
@@ -910,3 +920,7 @@ References
 .. [#f5] `SLURM PMI-1 implementation <https://github.com/SchedMD/slurm/blob/ba603812b947f14c1aba7adb220258feb7960001/src/api/slurm_pmi.c>`__
 
 .. [#f6] `PMI: A Scalable Parallel Process-Management Interface for Extreme-Scale Systems <https://www.mcs.anl.gov/papers/P1760.pdf>`__, P. Balaji et al, EuroMPI Proceedings, 2010.
+
+.. [#f7] `MPICH PMI-1.1 wire protocol definition <https://github.com/pmodels/mpich/blob/main/src/pmi/maint/pmi-1.1.txt>`__
+
+.. [#f8] `MPICH PMI-1.2 wire protocol definition <https://github.com/pmodels/mpich/blob/main/src/pmi/maint/pmi-1.2.txt>`__
