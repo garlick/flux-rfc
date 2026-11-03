@@ -62,6 +62,7 @@ Table of Contents
 - [50/Job Execution Eventlog](spec_50.rst)
 - [52/D-bus Bridge Protocol](spec_52.rst)
 - [53/Flux Message Protocol Version 2](spec_53.rst)
+- [54/Flux Job Dictionary](spec_54.rst)
 
 Build Instructions
 ------------------

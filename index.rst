@@ -338,6 +338,12 @@ through the Flux ``sdbus`` service.
 This specification describes the format of Flux message broker
 messages, Version 2.
 
+:doc:`spec_54`
+~~~~~~~~~~~~~~
+
+This RFC defines the Flux job dictionary, a job-scoped key-value service
+in the job shell, and the process manager use cases it must support.
+
 .. Each file must appear in a toctree
 .. toctree::
    :hidden:
@@ -392,3 +398,4 @@ messages, Version 2.
    spec_50
    spec_52
    spec_53
+   spec_54
